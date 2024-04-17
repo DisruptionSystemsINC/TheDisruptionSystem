@@ -1,0 +1,5 @@
+0 Exited successfully (No errors)
+1 CRASH (Could not create file)
+2 CRASH (Could not write to file)
+3 CRASH Invalid File Structure of System File
+4 CRASH (Critical file could not be found)
