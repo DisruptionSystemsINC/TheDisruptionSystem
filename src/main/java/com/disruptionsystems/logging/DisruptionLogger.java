@@ -1,6 +1,6 @@
 package com.disruptionsystems.logging;
 
-import com.disruptionsystems.SystemLauncher;
+import com.disruptionsystems.DragonLog;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -8,11 +8,9 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
 public class DisruptionLogger {
-    public DisruptionLogger(String logLocation){
-        SystemLauncher.logLocation = logLocation;
-    }
-    public static void printToLog(LogLevel level, String msg) {
-        File logFile = new File(SystemLauncher.logLocation);
+
+    public void printToLog(LogLevel level, String msg) {
+        File logFile = new File(DragonLog.getLogLocation());
         String messgae = getAppropriateEscapeChar(level)+"[" + LocalDate.now() + "    " + LocalTime.now().truncatedTo(ChronoUnit.SECONDS) + "]     \n[" + level + "] " + msg + "\n";
         System.out.println(messgae);
         if (!logFile.exists()){
@@ -23,7 +21,7 @@ public class DisruptionLogger {
                 writer.close();
             }
             catch (IOException e){
-                System.out.println("WARNING: CRITICAL: SYSTEM CANNOT PROCEED: COULD NOT CREATE FILE \"log.chorus\"");
+                System.out.println("\033[36mWARNING: CRITICAL: SYSTEM CANNOT PROCEED: COULD NOT CREATE FILE \"log.chorus\"");
                 System.out.println(e.getMessage());
                 System.exit(1);
             }
