@@ -17,8 +17,8 @@ public class DragonLog extends DisruptionLogger{
         File configFile = new File("config.chorus");
         if (!configFile.exists()){
             try {
-                createBaseFileStructure();
                 createDefaultFileLayout(configFile);
+                createBaseFileStructure();
             }
             catch (IOException e){
                 System.out.println("Could not create or read file: config.chorus. Reason:\n" + e.getMessage());
@@ -38,7 +38,7 @@ public class DragonLog extends DisruptionLogger{
         logger.printToLog(LogLevel.INFORMATION, "System Startup complete. Awaiting Input");
     }
     public static void createBaseFileStructure(){
-        File LogFolderFile = new File(logLocation);
+        File LogFolderFile = new File("data/logs/");
         if (!LogFolderFile.exists()){
             LogFolderFile.mkdirs();
         }
