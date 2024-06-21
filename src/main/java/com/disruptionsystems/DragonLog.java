@@ -11,11 +11,13 @@ public class DragonLog extends DisruptionLogger{
     public DragonLog(){
         main(new String[]{""});
     }
+
     public static String logLocation;
     public static void main(String[] args){
         File configFile = new File("config.chorus");
         if (!configFile.exists()){
             try {
+                createBaseFileStructure();
                 createDefaultFileLayout(configFile);
             }
             catch (IOException e){
@@ -34,7 +36,6 @@ public class DragonLog extends DisruptionLogger{
         }
         DisruptionLogger logger = new DisruptionLogger();
         logger.printToLog(LogLevel.INFORMATION, "System Startup complete. Awaiting Input");
-        createBaseFileStructure();
     }
     public static void createBaseFileStructure(){
         File LogFolderFile = new File(logLocation);
