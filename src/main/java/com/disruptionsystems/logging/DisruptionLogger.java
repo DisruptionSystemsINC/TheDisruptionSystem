@@ -13,9 +13,10 @@ public class DisruptionLogger {
         File logFile = new File(DragonLog.getLogLocation());
         String messgae = getAppropriateEscapeChar(level)+"[" + LocalDate.now() + "    " + LocalTime.now().truncatedTo(ChronoUnit.SECONDS) + "]     \n[" + level + "] " + msg + "\n";
         System.out.println(messgae);
-        if (!logFile.exists()){
             try {
-                logFile.createNewFile();
+                if (!logFile.exists()) {
+                    logFile.createNewFile();
+                }
                 Writer writer = new PrintWriter(new BufferedWriter(new FileWriter(logFile, true)));
                 writer.append(messgae);
                 writer.close();
@@ -25,7 +26,6 @@ public class DisruptionLogger {
                 System.out.println(e.getMessage());
                 System.exit(1);
             }
-        }
     }
 
     public static String getAppropriateEscapeChar(LogLevel level){
