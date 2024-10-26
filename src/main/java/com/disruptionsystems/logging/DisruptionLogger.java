@@ -11,7 +11,7 @@ public class DisruptionLogger {
 
     public void printToLog(LogLevel level, String msg) {
         File logFile = new File(DragonLog.getLogLocation());
-        String messgae = getAppropriateEscapeChar(level)+"[" + LocalDate.now() + "    " + LocalTime.now().truncatedTo(ChronoUnit.SECONDS) + "]     \n[" + level + "] " + msg + "\n";
+        String messgae = getAppropriateEscapeChar(level)+"[" + LocalDate.now() + "    " + LocalTime.now().truncatedTo(ChronoUnit.SECONDS) + "]     \n" + getAppropriateEscapeChar(level) + "[" + level + "] " + msg + "\n";
         System.out.println(messgae);
             try {
                 if (!logFile.exists()) {
