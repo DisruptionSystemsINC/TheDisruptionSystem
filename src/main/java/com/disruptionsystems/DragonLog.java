@@ -2,9 +2,8 @@ package com.disruptionsystems;
 
 import com.disruptionsystems.logging.DisruptionLogger;
 import com.disruptionsystems.logging.LogLevel;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.*;
+import java.util.Properties;
 
 public class DragonLog extends DisruptionLogger{
 
@@ -14,11 +13,12 @@ public class DragonLog extends DisruptionLogger{
 
     public static String logLocation;
     public static void main(String[] args){
+        Properties props = new Properties();
         File configFile = new File("config.chorus");
         if (!configFile.exists()){
             try {
                 createBaseFileStructure();
-                createDefaultFileLayout(configFile);
+                createDefaultFileLayout(props, configFile);
             }
             catch (IOException e){
                 System.out.println("Could not create or read file: config.chorus. Reason:\n" + e.getMessage());
@@ -26,19 +26,16 @@ public class DragonLog extends DisruptionLogger{
             }
         }
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode node = mapper.readTree(configFile);
-            logLocation = node.get("logFile").asText();
+            props.load(new FileInputStream(configFile));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        catch (IOException e){
-            System.out.println("Invalid Config File Structure detected... Aborting Startup");
-            System.exit(3);
-        }
+        logLocation = props.getProperty("logLocation");
         DisruptionLogger logger = new DisruptionLogger();
         logger.printToLog(LogLevel.INFORMATION, "System Startup complete. Awaiting Input");
     }
     public static void createBaseFileStructure(){
-        File LogFolderFile = new File("data/logs/");
+        File LogFolderFile = new File("data/log/");
         if (!LogFolderFile.exists()){
             LogFolderFile.mkdirs();
         }
@@ -47,13 +44,8 @@ public class DragonLog extends DisruptionLogger{
         return logLocation;
     }
 
-    public static void createDefaultFileLayout(File file) throws IOException {
-        file.createNewFile();
-        String s = File.separator;
-        PrintWriter w = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
-        w.append("{\n");
-        w.append("  \"logFile\":\"data" + s + "logging" + s + "\"\n");
-        w.append("}");
-        w.close();
+    public static void createDefaultFileLayout(Properties props, File configFile) throws IOException {
+        props.setProperty("logLocation", "data/log/log.chorus");
+        props.store(new FileWriter(configFile), null);
     }
 }
