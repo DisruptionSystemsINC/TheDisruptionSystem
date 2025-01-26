@@ -4,19 +4,23 @@ import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class DragonLog {
 
-    public DragonLog(String configLocation){
-        init();
-        this.configLocation = configLocation;
-    }
+    private String logLocation;
+    private Properties props;
+    private String configLocation;
+    private File logFile;
 
-    private static String logLocation;
-    private static Properties props;
-    private static String configLocation;
-    private static File logFile;
+    public DragonLog(String configLocation){
+        this.configLocation = configLocation;
+        init();
+    }
 
 
     private void init(){
@@ -24,8 +28,14 @@ public class DragonLog {
         File configFile = new File(configLocation);
         if (!configFile.exists()){
             try {
-                this.createBaseFileStructure();
                 createDefaultFileLayout(props, configFile);
+                try {
+                    props.load(new FileInputStream(configFile));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                logLocation = props.getProperty("logLocation");
+                this.createBaseFileStructure();
             }
             catch (IOException e){
                 System.out.println("Could not create or read file: "+configLocation+". Reason:\n" + e.getMessage());
@@ -38,6 +48,7 @@ public class DragonLog {
             throw new RuntimeException(e);
         }
         logLocation = props.getProperty("logLocation");
+        logFile = new File(logLocation + props.getProperty("logName"));
         this.printToLog(LogLevel.INFORMATION, "System Startup complete. Awaiting Input");
     }
     private void createBaseFileStructure(){
@@ -50,20 +61,40 @@ public class DragonLog {
         return logLocation;
     }
 
-    public LogLevel getLogLevel(){
-        return (LogLevel) props.get("logLevel");
+    public String getLogFileName(){
+        return logFile.getName();
+    }
+
+    public String getLogLevel(){
+        return (String) props.get("logLevel");
     }
 
     public static void createDefaultFileLayout(Properties props, File configFile) throws IOException {
         props.setProperty("logLocation", "data/log/");
         props.setProperty("logName", "log.chorus");
-        props.setProperty("logLevel", "INFO");
+        props.setProperty("logLevel", "INFORMATION");
         props.store(new FileWriter(configFile), null);
     }
 
+    public List<LogLevel> isBelowLevel(String level){
+        return switch (level) {
+            case "INFORMATION" ->
+                    new ArrayList<LogLevel>(List.of(new LogLevel[]{LogLevel.INFORMATION, LogLevel.WARNING, LogLevel.ERROR, LogLevel.CRITICAL, LogLevel.CRASH}));
+            case "WARNING" ->
+                    new ArrayList<LogLevel>(List.of(new LogLevel[]{LogLevel.WARNING, LogLevel.ERROR, LogLevel.CRITICAL, LogLevel.CRASH}));
+            case "ERROR" ->
+                    new ArrayList<LogLevel>(List.of(new LogLevel[]{LogLevel.ERROR, LogLevel.CRITICAL, LogLevel.CRASH}));
+            case "CRITICAL" ->
+                    new ArrayList<LogLevel>(List.of(new LogLevel[]{LogLevel.CRITICAL, LogLevel.CRASH}));
+            case "CRASH" ->
+                    new ArrayList<LogLevel>(List.of(new LogLevel[]{LogLevel.CRASH}));
+            default -> null;
+        };
+    }
+
     public void printToLog(LogLevel level, String msg) {
-        if (level.name().equals(this.getLogLevel().name())) {
-            logFile = new File(this.getLogLocation());
+        if (isBelowLevel(getLogLevel()).contains(level)) {
+            logFile = new File(this.getLogFileName());
             String message = getAppropriateEscapeChar(level) + "[" + LocalDate.now() + "    " + LocalTime.now().truncatedTo(ChronoUnit.SECONDS) + "]     \n" + getAppropriateEscapeChar(level) + "[" + level + "] " + msg + "\n";
             System.out.println(message);
             try {
