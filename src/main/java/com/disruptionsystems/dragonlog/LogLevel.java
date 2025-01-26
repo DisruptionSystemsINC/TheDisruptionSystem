@@ -1,4 +1,4 @@
-package com.disruptionsystems;
+package com.disruptionsystems.dragonlog;
 
 public enum LogLevel {
     INFORMATION,

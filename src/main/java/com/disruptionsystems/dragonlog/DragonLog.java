@@ -1,4 +1,4 @@
-package com.disruptionsystems;
+package com.disruptionsystems.dragonlog;
 
 import java.io.*;
 import java.time.LocalDate;
